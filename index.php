@@ -1,3 +1,59 @@
+<?php
+
+session_start();
+
+// Inclures les Classes
+
+	// Inclure les classes
+	spl_autoload_register(function($classe){
+
+		require_once('class/'.$classe.'.php');
+	});
+	
+
+	if(!empty($_POST['pseudo']) && !empty($_POST['email']) && !empty($_POST['password'])){
+
+		// Variables 
+
+		$pseudo   =  htmlspecialchars($_POST['pseudo']);
+		$email    =  htmlspecialchars($_POST['email']);
+		$password =  htmlspecialchars($_POST['password']);
+		
+
+		// Vérifier la syntax de l'email
+		if(!Verifier::syntaxeEmail($email)){
+			header('location:index.php?error=true&message=Vérifier le format de votre adresse email.');
+			exit();
+		}
+		// Vérifier le doublon de L'email
+		if(Verifier::doublonEmail($email)){
+			header('location:index.php?error=true&message=Cette adresse mail est déjà utiliser.');
+			exit();
+		}
+
+		// Chiffré  le mot de passe
+		$password = Securite::chiffrer($password);
+
+
+		// Créer un Utilisateur
+
+		$utilisateur = new Utilisateur($pseudo, $email, $password);
+		$utilisateur->enregistrer();
+		$utilisateur->creerLesSessions();
+
+
+		// Rediriger L'utilisateur
+		header('location: index.php?success=true');
+		exit();
+		 
+
+	}
+
+
+
+?>
+
+
 <!DOCTYPE html>
 <html>
 <head>
